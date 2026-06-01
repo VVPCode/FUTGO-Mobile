@@ -297,7 +297,7 @@ class ProdutoViewModel : ViewModel() {
         }
     }
 
-    fun salvarProdutoComImagem(context: Context, imageUri: Uri?, produto: Produto, onSuccess: () -> Unit, onError: (String) -> Unit) {
+    fun salvarProdutoComImagem(context: Context, imageUri: Uri?, produto: Produto, onSuccess: (String) -> Unit, onError: (String) -> Unit) {
         viewModelScope.launch {
             _isLoading.value = true
             try {
@@ -326,7 +326,8 @@ class ProdutoViewModel : ViewModel() {
                 }
 
                 fetchProdutos()
-                onSuccess()
+                // Retorna a URL final da imagem ao callback de sucesso
+                onSuccess(finalImageUrl)
             } catch (e: Exception) {
                 e.printStackTrace()
                 onError("Erro ao salvar: ${e.message}")
@@ -880,7 +881,11 @@ fun ProdutoFormScreen(
                         context = context,
                         imageUri = selectedImageUri,
                         produto = produtoSalvar,
-                        onSuccess = {
+                        onSuccess = { imagemUrl ->
+                            // Atualizar a URL da imagem após sucesso
+                            if (imagemUrl.isNotEmpty()) {
+                                urlImagemOriginal = imagemUrl
+                            }
                             Toast.makeText(context, "Salvo com sucesso!", Toast.LENGTH_SHORT).show()
                             onBack()
                         },
